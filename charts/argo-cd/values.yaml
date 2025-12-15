@@ -42,7 +42,7 @@ crds:
 global:
   # -- Default domain used by all components
   ## Used for ingresses, certificates, SSO, notifications, etc.
-  domain: argocd.example.com
+  domain: argocd.caps.freeddns.org
 
   # -- Runtime class name for all components
   runtimeClassName: ""
@@ -407,6 +407,8 @@ configs:
     # -- Create the argocd-cmd-params-cm configmap
     # If false, it is expected the configmap will be created by something else.
     create: true
+
+    server.insecure: true
 
     # -- Annotations to be added to the argocd-cmd-params-cm ConfigMap
     annotations: {}
@@ -2390,7 +2392,7 @@ server:
   # Argo CD server ingress configuration
   ingress:
     # -- Enable an ingress resource for the Argo CD server
-    enabled: false
+    enabled: true
     # -- Specific implementation for ingress controller. One of `generic`, `aws` or `gke`
     ## Additional configuration might be required in related configuration sections
     controller: generic
@@ -2398,16 +2400,17 @@ server:
     labels: {}
     # -- Additional ingress annotations
     ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-1-ssl-passthrough
-    annotations: {}
-      # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    annotations: 
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
       # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 
     # -- Defines which ingress controller will implement the resource
-    ingressClassName: ""
+    ingressClassName: "nginx"
 
     # -- Argo CD server hostname
     # @default -- `""` (defaults to global.domain)
-    hostname: ""
+    hostname: "argocd.caps.freeddns.org"
 
     # -- The path to Argo CD server
     path: /
@@ -2454,10 +2457,10 @@ server:
 
     # -- Additional TLS configuration
     # @default -- `[]` (See [values.yaml])
-    extraTls: []
-      # - hosts:
-      #   - argocd.example.com
-      #   secretName: your-certificate-name
+    extraTls: 
+      - hosts:
+        - argocd.caps.freeddns.org
+        secretName: argocd-tls-secret
 
     # AWS specific options for Application Load Balancer
     # Applies only when `serv.ingress.controller` is set to `aws`
